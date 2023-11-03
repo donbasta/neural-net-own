@@ -6,6 +6,7 @@ from src.layer.dense import Dense
 
 from src.layer.detector import Detector
 from src.layer.flatten import Flatten
+from src.layer.lstm import LSTM
 from src.layer.pooling import Pooling
 
 
@@ -26,8 +27,8 @@ class Sequential:
             result = i
             for layer in self.layers:
                 result = layer.run(result)
-            final_result.append(result)
             print(f"Finished processing data {idx}")
+            final_result.append(result)
 
         return np.array(final_result)
 
@@ -49,25 +50,17 @@ class Sequential:
         for layer in data:
             layer_obj = None
             if layer["type"] == "conv2d":
-                layer_obj = Convolutional(
-                    input_shape=(1, 28, 28),
-                    padding=0,
-                    filter_count=2,
-                    kernel_shape=(2, 2),
-                    stride=1,
-                )
+                layer_obj = Convolutional.load_from_file(layer)
             elif layer["type"] == "dtctr":
-                layer_obj = Detector(activation="relu")
-            elif layer["type"] == "max_pool":
-                layer_obj = Pooling(size=(2, 2), stride=1, mode="max")
-            elif layer["type"] == "avg_pool":
-                layer_obj = Pooling(size=(2, 2), stride=1, mode="max")
+                layer_obj = Detector.load_from_file(layer)
+            elif layer["type"] == "max_pool" or layer["type"] == "avg_pool":
+                layer_obj = Pooling.load_from_file(layer)
             elif layer["type"] == "flatten":
                 layer_obj = Flatten()
             elif layer["type"] == "dense":
-                layer_obj = Dense(size=10, input_size=10, activation="softmax")
+                layer_obj = Dense.load_from_file(layer)
             elif layer["type"] == "lstm":
-                pass
+                layer_obj = LSTM.load_from_file(layer)
 
             layers_from_file.append(layer_obj)
 

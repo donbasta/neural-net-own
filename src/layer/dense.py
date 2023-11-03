@@ -5,6 +5,15 @@ from src.layer.base import BaseLayer
 ACTIVATION_MODES = ["relu", "sigmoid", "linear"]
 
 
+def get_activation_function(activation_type: str):
+    if activation_type == "sigmoid":
+        return sigmoid
+    elif activation_type == "relu":
+        return relu
+    elif activation_type == "linear":
+        return linear
+
+
 class Dense(BaseLayer):
     def __init__(self, size, input_size, activation="linear"):
         self.type = "dense"
@@ -13,17 +22,20 @@ class Dense(BaseLayer):
         self.weights = np.random.random((self.input_size + 1, size))
         self.activation = activation
 
+    @classmethod
+    def load_from_file(cls, data):
+        size = data["params"]["size"]
+        input_size = data["params"]["input_size"]
+        activation = data["params"]["activation"]
+        layer = cls(size, input_size, activation)
+        layer.weights = np.array(data["params"]["Wnb"])
+        return layer
+
     def run(self, inputs):
         biased_input = np.insert(inputs, 0, 1)
         biased_input = np.expand_dims(biased_input, axis=1)
         result = np.matmul(self.weights.T, biased_input).flatten()
-        if self.activation == "sigmoid":
-            activation_func = sigmoid
-        elif self.activation == "relu":
-            activation_func = relu
-        elif self.activation == "linear":
-            activation_func = linear
-        return activation_func(result)
+        return get_activation_function(self.activation)(result)
 
     def get_type(self):
         return "dense"
@@ -32,7 +44,9 @@ class Dense(BaseLayer):
         return {
             "type": self.type,
             "params": {
-                "kernel": self.weights[: self.input_size, :].tolist(),
-                "bias": self.weights[self.input_size: -1, :].tolist(),
+                "size": self.size,
+                "input_size": self.input_size,
+                "activation": self.activation,
+                "Wnb": self.weights.tolist()
             },
         }

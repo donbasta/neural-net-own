@@ -10,6 +10,12 @@ class Detector(BaseLayer):
         self.activation = activation
         self.type = "dtctr"
 
+    @classmethod
+    def load_from_file(cls, data):
+        activation = data["params"]["activation"]
+        layer = cls(activation)
+        return layer
+
     def run(self, inputs: np.array):
         if self.activation == "relu":
             activation_func = relu
@@ -19,4 +25,4 @@ class Detector(BaseLayer):
         return res(inputs)
 
     def to_object(self):
-        return {"type": self.type, "params": {}, "activation": self.activation}
+        return {"type": self.type, "params": {"activation": self.activation}}

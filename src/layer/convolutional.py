@@ -29,10 +29,23 @@ class Convolutional(BaseLayer):
         )
         self.bias = 1
         self.bias_weight = 0
-        self.type = "convolutional"
+        self.type = "conv2d"
+
+    @classmethod
+    def load_from_file(cls, data):
+        input_shape = data["params"]["input_shape"]
+        padding = data["params"]["padding"]
+        filter_count = data["params"]["filter_count"]
+        kernel_shape = data["params"]["kernel_shape"]
+        stride = data["params"]["stride"]
+        layer = cls(input_shape, padding, filter_count, kernel_shape, stride)
+
+        layer.filters = np.array(data["params"]["filters"])
+        layer.bias = data["params"]["bias"]
+
+        return layer
 
     def run_convolution_stage(self, inputs: np.array):
-        # inputs = np.moveaxis(inputs, -1, 0)
         final_fmap = []
         filter_idx = 0
         for kernels in self.filters:
@@ -58,16 +71,19 @@ class Convolutional(BaseLayer):
         return np.array(final_fmap) + bias_weight
 
     def run(self, inputs: np.array):
-        # print("inputs_size x ", inputs.size)
         return self.run_convolution_stage(inputs)
 
     def get_type(self):
-        return "conv2d"
+        return self.type
 
     def to_object(self):
         return {
             "type": self.get_type(),
             "params": {
+                "input_shape": self.input_shape,
+                "padding": self.padding,
+                "filter_count": self.filter_count,
+                "kernel_shape": self.kernel_shape,
                 "kernel": self.filters.tolist(),
                 "bias": self.bias,
             },

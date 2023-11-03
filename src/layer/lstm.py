@@ -36,8 +36,36 @@ class LSTM(BaseLayer):
         self.b_output = np.random.random((hidden_cell_dim, 1))
 
         self.return_sequences = return_sequences
+        self.type = "lstm"
 
-    def run_convolution_stage(self, inputs: np.array):
+    @classmethod
+    def load_from_file(cls, data):
+
+        input_shape = data["params"]["input_shape"]
+        hidden_cell_dim = data["params"]["hidden_cell_dim"]
+        return_sequences = data["params"]["return_sequences"]
+
+        layer = cls(input_shape, hidden_cell_dim, return_sequences)
+
+        layer.U_forget = np.array(data["params"]["forget_gate"]["U"])
+        layer.W_forget = np.array(data["params"]["forget_gate"]["W"])
+        layer.b_forget = np.array(data["params"]["forget_gate"]["b"])
+
+        layer.U_input = np.array(data["params"]["input_gate"]["U"])
+        layer.W_input = np.array(data["params"]["input_gate"]["W"])
+        layer.b_input = np.array(data["params"]["input_gate"]["b"])
+
+        layer.U_c = np.array(data["params"]["c_gate"]["U"])
+        layer.W_c = np.array(data["params"]["c_gate"]["W"])
+        layer.b_c = np.array(data["params"]["c_gate"]["b"])
+
+        layer.U_output = np.array(data["params"]["output_gate"]["U"])
+        layer.W_output = np.array(data["params"]["output_gate"]["W"])
+        layer.b_output = np.array(data["params"]["output_gate"]["b"])
+
+        return layer
+
+    def run_all_timesteps(self, inputs: np.array):
 
         outputs = []
         cell_state = np.zeros((self.hidden_cell_dim, 1))
@@ -74,7 +102,7 @@ class LSTM(BaseLayer):
         return np.array(outputs)
 
     def run(self, inputs: np.array):
-        return self.run_convolution_stage(inputs)
+        return self.run_all_timesteps(inputs)
 
     def get_type(self):
         return self.type
@@ -83,26 +111,28 @@ class LSTM(BaseLayer):
         return {
             "type": self.get_type(),
             "params": {
-                "hidden_dim": self.hidden_cell_dim,
+                "input_shape": self.input_shape,
+                "hidden_cell_dim": self.hidden_cell_dim,
+                "return_sequences": self.return_sequences,
                 "forget_gate": {
-                    "U": self.U_forget,
-                    "W": self.W_forget,
-                    "b": self.b_forget,
+                    "U": self.U_forget.tolist(),
+                    "W": self.W_forget.tolist(),
+                    "b": self.b_forget.tolist(),
                 },
                 "input_gate": {
-                    "U": self.U_input,
-                    "W": self.W_input,
-                    "b": self.b_input,
+                    "U": self.U_input.tolist(),
+                    "W": self.W_input.tolist(),
+                    "b": self.b_input.tolist(),
                 },
                 "c_gate": {
-                    "U": self.U_c,
-                    "W": self.W_c,
-                    "b": self.b_c,
+                    "U": self.U_c.tolist(),
+                    "W": self.W_c.tolist(),
+                    "b": self.b_c.tolist(),
                 },
                 "output_gate": {
-                    "U": self.U_output,
-                    "W": self.W_output,
-                    "b": self.b_output,
+                    "U": self.U_output.tolist(),
+                    "W": self.W_output.tolist(),
+                    "b": self.b_output.tolist(),
                 },
             },
         }

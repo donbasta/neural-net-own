@@ -15,6 +15,14 @@ class Pooling(BaseLayer):
             raise TypeError("pooling mode must be either 'max' or 'avg'.")
         self.type = f"{mode}_pool"
 
+    @classmethod
+    def load_from_file(cls, data):
+        size = data["params"]["size"]
+        stride = data["params"]["stride"]
+        mode = data["params"]["mode"]
+        layer = cls(size, stride, mode)
+        return layer
+
     def run_pooling(self, inputs):
         res = []
         for i in inputs:
@@ -33,12 +41,15 @@ class Pooling(BaseLayer):
     def to_object(self):
         return {
             "type": self.type,
-            "params": {},
+            "params": {
+                "mode": self.mode,
+                "size": self.size,
+                "stride": self.stride
+            },
         }
 
 
 def generate_strides(mat: np.array, kernel_size, stride):
-    # print(mat.shape)
     view_shape = tuple(np.subtract(mat.shape, kernel_size) + 1) + kernel_size
     view_strides = mat.strides + mat.strides
     result = as_strided(mat, strides=view_strides, shape=view_shape)[
