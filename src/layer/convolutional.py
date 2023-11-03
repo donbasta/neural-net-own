@@ -33,10 +33,10 @@ class Convolutional(BaseLayer):
 
     @classmethod
     def load_from_file(cls, data):
-        input_shape = data["params"]["input_shape"]
+        input_shape = tuple(data["params"]["input_shape"])
         padding = data["params"]["padding"]
         filter_count = data["params"]["filter_count"]
-        kernel_shape = data["params"]["kernel_shape"]
+        kernel_shape = tuple(data["params"]["kernel_shape"])
         stride = data["params"]["stride"]
         layer = cls(input_shape, padding, filter_count, kernel_shape, stride)
 
@@ -84,7 +84,8 @@ class Convolutional(BaseLayer):
                 "padding": self.padding,
                 "filter_count": self.filter_count,
                 "kernel_shape": self.kernel_shape,
-                "kernel": self.filters.tolist(),
+                "stride": self.stride,
+                "filters": self.filters.tolist(),
                 "bias": self.bias,
             },
         }

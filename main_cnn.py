@@ -30,19 +30,25 @@ def get_data():
         except Exception as e:
             print(e)
 
-    print(len(train))
     return train
 
 
+NROW = 10
+
+
 def forward_prop_panda_bear():
-    # print("Loading Panda Bear Dataset...")
     train_data = get_data()
 
     train_x, train_y = train_data["x"], train_data["y"]  # noqa: F841
     train_x = np.asarray(train_x)
 
     train_x = train_x.reshape((500, 3, 256, 256))
-    # print(f"Training shape: {train_x.shape}")
+
+    train_x_cut = train_x[:NROW]
+    train_y_cut = train_y[:NROW]  # noqa: F841
+
+    train_x_cut = train_x_cut.astype("float")
+    train_x_cut /= 255
 
     model = Sequential()
     model.add(
@@ -56,17 +62,38 @@ def forward_prop_panda_bear():
     )
     model.add(Detector(activation="relu"))
     model.add(Pooling(size=(2, 2), stride=2, mode="max"))
+    model.add(Pooling(size=(5, 5), stride=5, mode="avg"))
     model.add(Flatten())
-    model.add(Dense(size=10, input_size=32258, activation="sigmoid"))
-    model.add(Dense(size=10, input_size=10, activation="sigmoid"))
+    model.add(Dense(size=10, input_size=1250, activation="relu"))
+    model.add(Dense(size=1, input_size=10, activation="sigmoid"))
 
-    # print(train_x.shape)
-    result = model.run(inputs=train_x)
+    predictions = model.run(inputs=train_x_cut)
 
-    model.save_model()
+    model.save_model("model-image-convnet.json")
 
-    ic(result)
-    ic(result.shape)
+    ic(predictions)
+
+
+def forward_prop_panda_bear_load_model():
+    train_data = get_data()
+
+    train_x, train_y = train_data["x"], train_data["y"]  # noqa: F841
+    train_x = np.asarray(train_x)
+
+    train_x = train_x.reshape((500, 3, 256, 256))
+
+    train_x_cut = train_x[:NROW]
+    train_y_cut = train_y[:NROW]  # noqa: F841
+
+    train_x_cut = train_x_cut.astype("float")
+    train_x_cut /= 255
+
+    model = Sequential()
+    model.load_model("model-image-convnet.json")
+
+    predictions = model.run(inputs=train_x_cut)
+
+    ic(predictions)
 
 
 def test_load_model():
@@ -75,5 +102,6 @@ def test_load_model():
 
 
 if __name__ == "__main__":
-    test_load_model()
-    forward_prop_panda_bear()
+    # test_load_model()
+    # forward_prop_panda_bear()
+    forward_prop_panda_bear_load_model()

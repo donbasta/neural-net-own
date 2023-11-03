@@ -14,10 +14,11 @@ class Pooling(BaseLayer):
         else:
             raise TypeError("pooling mode must be either 'max' or 'avg'.")
         self.type = f"{mode}_pool"
+        self.mode = mode
 
     @classmethod
     def load_from_file(cls, data):
-        size = data["params"]["size"]
+        size = tuple(data["params"]["size"])
         stride = data["params"]["stride"]
         mode = data["params"]["mode"]
         layer = cls(size, stride, mode)
