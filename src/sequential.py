@@ -22,19 +22,20 @@ class Sequential:
     def run(self, inputs):
         final_result = []
 
-        for i in inputs:
+        for idx, i in enumerate(inputs):
             result = i
             for layer in self.layers:
                 result = layer.run(result)
             final_result.append(result)
+            print(f"Finished processing data {idx}")
 
         return np.array(final_result)
 
-    def save_model(self):
+    def save_model(self, filepath):
         params = []
         for layer in self.layers:
             params.append(layer.to_object())
-        with open("model.json", "w") as f:
+        with open(filepath, "w") as f:
             data = json.dumps(params)
             f.write(data)
 
@@ -49,7 +50,7 @@ class Sequential:
                 tmp_x = out_x = 0
                 while tmp_x + self.size <= orig_dim:
                     patch = self.last_input[
-                        c, tmp_y : tmp_y + self.size, tmp_x : tmp_x + self.size
+                        c, tmp_y: tmp_y + self.size, tmp_x: tmp_x + self.size
                     ]
                     (x, y) = np.unravel_index(np.nanargmax(patch), patch.shape)
                     dout[c, tmp_y + x, tmp_x + y] += din[c, out_y, out_x]
@@ -64,7 +65,6 @@ class Sequential:
         with open(filepath, "r") as f:
             data = json.load(f)
         for layer in data:
-            print(layer["type"])
             layer_obj = None
             if layer["type"] == "conv2d":
                 layer_obj = Convolutional(

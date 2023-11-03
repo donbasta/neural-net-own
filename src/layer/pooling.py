@@ -38,6 +38,7 @@ class Pooling(BaseLayer):
 
 
 def generate_strides(mat: np.array, kernel_size, stride):
+    # print(mat.shape)
     view_shape = tuple(np.subtract(mat.shape, kernel_size) + 1) + kernel_size
     view_strides = mat.strides + mat.strides
     result = as_strided(mat, strides=view_strides, shape=view_shape)[

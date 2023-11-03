@@ -1,12 +1,12 @@
 import numpy as np
-from src.activations import relu, sigmoid
+from src.activations import relu, sigmoid, linear
 from src.layer.base import BaseLayer
 
-ACTIVATION_MODES = ["relu", "sigmoid"]
+ACTIVATION_MODES = ["relu", "sigmoid", "linear"]
 
 
 class Dense(BaseLayer):
-    def __init__(self, size, input_size, activation="sigmoid"):
+    def __init__(self, size, input_size, activation="linear"):
         self.type = "dense"
         self.size = size
         self.input_size = input_size
@@ -21,6 +21,8 @@ class Dense(BaseLayer):
             activation_func = sigmoid
         elif self.activation == "relu":
             activation_func = relu
+        elif self.activation == "linear":
+            activation_func = linear
         return activation_func(result)
 
     def get_type(self):

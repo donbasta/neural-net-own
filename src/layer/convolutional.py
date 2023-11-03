@@ -32,6 +32,7 @@ class Convolutional(BaseLayer):
         self.type = "convolutional"
 
     def run_convolution_stage(self, inputs: np.array):
+        # inputs = np.moveaxis(inputs, -1, 0)
         final_fmap = []
         filter_idx = 0
         for kernels in self.filters:
@@ -57,6 +58,7 @@ class Convolutional(BaseLayer):
         return np.array(final_fmap) + bias_weight
 
     def run(self, inputs: np.array):
+        # print("inputs_size x ", inputs.size)
         return self.run_convolution_stage(inputs)
 
     def get_type(self):

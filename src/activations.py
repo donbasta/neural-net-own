@@ -8,3 +8,7 @@ def sigmoid(x: np.ndarray):
 
 def relu(x: np.ndarray):
     return np.maximum(0, x)
+
+
+def linear(x: np.ndarray):
+    return x
