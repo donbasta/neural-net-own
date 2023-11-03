@@ -40,25 +40,7 @@ class Sequential:
             f.write(data)
 
     def backward(self, din, learning_rate):
-        (num_channels, orig_dim) = self.last_input.shape
-
-        dout = np.zeros(self.last_input.shape)
-
-        for c in range(num_channels):
-            tmp_y = out_y = 0
-            while tmp_y + self.size <= orig_dim:
-                tmp_x = out_x = 0
-                while tmp_x + self.size <= orig_dim:
-                    patch = self.last_input[
-                        c, tmp_y: tmp_y + self.size, tmp_x: tmp_x + self.size
-                    ]
-                    (x, y) = np.unravel_index(np.nanargmax(patch), patch.shape)
-                    dout[c, tmp_y + x, tmp_x + y] += din[c, out_y, out_x]
-                    tmp_x += self.stride
-                    out_x += 1
-                tmp_y += self.stride
-                out_y += 1
-        return dout
+        pass
 
     def load_model(self, filepath):
         layers_from_file = []
@@ -84,6 +66,8 @@ class Sequential:
                 layer_obj = Flatten()
             elif layer["type"] == "dense":
                 layer_obj = Dense(size=10, input_size=10, activation="softmax")
+            elif layer["type"] == "lstm":
+                pass
 
             layers_from_file.append(layer_obj)
 

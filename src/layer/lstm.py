@@ -1,5 +1,5 @@
+from src.activations import sigmoid, tanh
 from src.layer.base import BaseLayer
-from numpy.lib.stride_tricks import as_strided
 import numpy as np
 
 
@@ -11,99 +11,98 @@ class LSTM(BaseLayer):
     def __init__(
         self,
         input_shape,
-        padding,
-        filter_count,
-        kernel_shape,
-        stride,
+        hidden_cell_dim,
+        return_sequences=False
     ):
         self.input_shape = input_shape
-        self.padding = padding
-        self.stride = stride
-        self.filter_count = filter_count
-        self.kernel_shape = kernel_shape
-        self.n_channels = input_shape[0]
-        self.filters = np.array(
-            generate_random_uniform_matrixes(
-                self.filter_count, self.n_channels, self.kernel_shape
-            )
-        )
-        self.bias = 1
-        self.bias_weight = 0
-        self.type = "convolutional"
+        self.input_dim = input_shape[0]
+        self.timestep = input_shape[1]
+        self.hidden_cell_dim = hidden_cell_dim
+
+        self.U_forget = np.random.random((self.input_dim, hidden_cell_dim))
+        self.W_forget = np.random.random((hidden_cell_dim, hidden_cell_dim))
+        self.b_forget = np.random.random((hidden_cell_dim, 1))
+
+        self.U_input = np.random.random((self.input_dim, hidden_cell_dim))
+        self.W_input = np.random.random((hidden_cell_dim, hidden_cell_dim))
+        self.b_input = np.random.random((hidden_cell_dim, 1))
+
+        self.U_c = np.random.random((self.input_dim, hidden_cell_dim))
+        self.W_c = np.random.random((hidden_cell_dim, hidden_cell_dim))
+        self.b_c = np.random.random((hidden_cell_dim, 1))
+
+        self.U_output = np.random.random((self.input_dim, hidden_cell_dim))
+        self.W_output = np.random.random((hidden_cell_dim, hidden_cell_dim))
+        self.b_output = np.random.random((hidden_cell_dim, 1))
+
+        self.return_sequences = return_sequences
 
     def run_convolution_stage(self, inputs: np.array):
-        final_fmap = []
-        filter_idx = 0
-        for kernels in self.filters:
-            fmap = []
-            for channel_idx, input_channel in enumerate(inputs):
-                padded = pad_array(input_channel, self.padding, 0)
-                strided_views = generate_strides(
-                    padded, self.kernel_shape, stride=self.stride
-                )
-                multiplied_views = np.array(
-                    [np.multiply(view, kernels[channel_idx])
-                     for view in strided_views]
-                )
-                conv_mult_res = np.array(
-                    [[np.sum(view) for view in row]
-                     for row in multiplied_views]
-                )
-                fmap.append(conv_mult_res)
-            fmap = np.array(fmap)
-            final_fmap.append(add_all_feature_maps(fmap))
-            filter_idx += 1
-        bias_weight = self.bias * self.bias_weight
-        return np.array(final_fmap) + bias_weight
+
+        outputs = []
+        cell_state = np.zeros((self.hidden_cell_dim, 1))
+        hidden_state = np.zeros((self.hidden_cell_dim, 1))
+
+        for t, x_t in enumerate(inputs):
+            x_t = np.expand_dims(x_t, axis=1)
+            f_t = sigmoid(np.matmul(self.U_forget.T, x_t) +
+                          np.matmul(self.W_forget.T, hidden_state)
+                          + self.b_forget)
+            cell_state = np.multiply(cell_state, f_t)
+            i_t = sigmoid(np.matmul(self.U_input.T, x_t) +
+                          np.matmul(self.W_input.T, hidden_state)
+                          + self.b_input)
+            c_t = tanh(np.matmul(self.U_c.T, x_t) +
+                       np.matmul(self.W_c.T, hidden_state)
+                       + self.b_c)
+            cell_state += np.multiply(i_t, c_t)
+            o_t = sigmoid(np.matmul(self.U_output.T, x_t) +
+                          np.matmul(self.W_output.T, hidden_state)
+                          + self.b_output)
+            tanh_cell_state = tanh(cell_state)
+            hidden_state = np.multiply(o_t, tanh_cell_state)
+
+            if t == self.timestep - 1:
+                outputs.append(hidden_state.flatten())
+            else:
+                if self.return_sequences:
+                    outputs.append(hidden_state.flatten())
+
+        if not self.return_sequences:
+            outputs = outputs[0]
+
+        return np.array(outputs)
 
     def run(self, inputs: np.array):
         return self.run_convolution_stage(inputs)
 
     def get_type(self):
-        return "conv2d"
+        return self.type
 
     def to_object(self):
         return {
             "type": self.get_type(),
             "params": {
-                "kernel": self.filters.tolist(),
-                "bias": self.bias,
+                "hidden_dim": self.hidden_cell_dim,
+                "forget_gate": {
+                    "U": self.U_forget,
+                    "W": self.W_forget,
+                    "b": self.b_forget,
+                },
+                "input_gate": {
+                    "U": self.U_input,
+                    "W": self.W_input,
+                    "b": self.b_input,
+                },
+                "c_gate": {
+                    "U": self.U_c,
+                    "W": self.W_c,
+                    "b": self.b_c,
+                },
+                "output_gate": {
+                    "U": self.U_output,
+                    "W": self.W_output,
+                    "b": self.b_output,
+                },
             },
         }
-
-
-def pad_with(vector, pad_width, _, kwargs):
-    pad_value = kwargs.get("padder", 10)
-    vector[: pad_width[0]] = pad_value
-    vector[-pad_width[1]:] = pad_value
-
-
-def pad_array(mat: np.array, size: int, padder: int):
-    padded = np.pad(mat, size, pad_with, padder=padder)
-    return padded
-
-
-def generate_strides(mat: np.array, kernel_size, stride):
-    view_shape = tuple(np.subtract(mat.shape, kernel_size) + 1) + kernel_size
-    view_strides = mat.strides + mat.strides
-    result = as_strided(mat, strides=view_strides, shape=view_shape)[
-        ::stride, ::stride]
-    return result
-
-
-def generate_random_uniform_matrixes(n_filter, n_channel, size):
-    np.random.seed(42)
-    return np.array(
-        [
-            [np.random.uniform(low=-1.0, high=1.0, size=size)
-             for _ in range(n_channel)]
-            for _ in range(n_filter)
-        ]
-    )
-
-
-def add_all_feature_maps(feature_map_arr: np.array):
-    res = np.zeros((feature_map_arr.shape[1], feature_map_arr.shape[2]))
-    for feature_map in feature_map_arr:
-        np.add(res, feature_map, out=res)
-    return res

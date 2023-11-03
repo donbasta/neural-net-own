@@ -23,7 +23,7 @@ class Convolutional(BaseLayer):
         self.kernel_shape = kernel_shape
         self.n_channels = input_shape[0]
         self.filters = np.array(
-            generate_random_uniform_matrixes(
+            generate_random_uniform_matrices(
                 self.filter_count, self.n_channels, self.kernel_shape
             )
         )
@@ -93,7 +93,7 @@ def generate_strides(mat: np.array, kernel_size, stride):
     return result
 
 
-def generate_random_uniform_matrixes(n_filter, n_channel, size):
+def generate_random_uniform_matrices(n_filter, n_channel, size):
     np.random.seed(42)
     return np.array(
         [
