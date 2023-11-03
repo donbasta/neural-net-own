@@ -3,9 +3,9 @@ from numpy.lib.stride_tricks import as_strided
 import numpy as np
 
 
-class Convolutional(BaseLayer):
+class LSTM(BaseLayer):
     """
-    Defines a convolutional layer consisting of inputs and kernels.
+    Defines an LSTM layer consisting of inputs and kernels.
     """
 
     def __init__(

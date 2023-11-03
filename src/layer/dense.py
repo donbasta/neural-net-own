@@ -31,6 +31,6 @@ class Dense(BaseLayer):
             "type": self.type,
             "params": {
                 "kernel": self.weights[: self.input_size, :].tolist(),
-                "bias": self.weights[self.input_size : -1, :].tolist(),
+                "bias": self.weights[self.input_size: -1, :].tolist(),
             },
         }

@@ -20,7 +20,8 @@ class Pooling(BaseLayer):
         for i in inputs:
             strided_views = generate_strides(i, self.size, stride=self.stride)
             feature_map = np.array(
-                [[self.pool_function(view) for view in row] for row in strided_views]
+                [[self.pool_function(view) for view in row]
+                 for row in strided_views]
             )
             res.append(feature_map)
         return np.array(res)
@@ -39,5 +40,6 @@ class Pooling(BaseLayer):
 def generate_strides(mat: np.array, kernel_size, stride):
     view_shape = tuple(np.subtract(mat.shape, kernel_size) + 1) + kernel_size
     view_strides = mat.strides + mat.strides
-    result = as_strided(mat, strides=view_strides, shape=view_shape)[::stride, ::stride]
+    result = as_strided(mat, strides=view_strides, shape=view_shape)[
+        ::stride, ::stride]
     return result
