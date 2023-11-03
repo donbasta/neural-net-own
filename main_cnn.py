@@ -61,11 +61,15 @@ def forward_prop_panda_bear():
         )
     )
     model.add(Detector(activation="relu"))
-    model.add(Pooling(size=(2, 2), stride=2, mode="max"))
-    model.add(Pooling(size=(5, 5), stride=5, mode="avg"))
-    model.add(Flatten())
+    model.add(Pooling(size=(2, 2), stride=2,
+              mode="max", input_shape=(254, 254, 2)))
+    model.add(Pooling(size=(5, 5), stride=5,
+              mode="avg", input_shape=(127, 127, 2)))
+    model.add(Flatten(input_shape=(25, 25, 2)))
     model.add(Dense(size=10, input_size=1250, activation="relu"))
     model.add(Dense(size=1, input_size=10, activation="sigmoid"))
+
+    model.summary()
 
     predictions = model.run(inputs=train_x_cut)
 
@@ -103,5 +107,5 @@ def test_load_model():
 
 if __name__ == "__main__":
     # test_load_model()
-    # forward_prop_panda_bear()
-    forward_prop_panda_bear_load_model()
+    forward_prop_panda_bear()
+    # forward_prop_panda_bear_load_model()

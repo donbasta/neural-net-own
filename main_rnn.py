@@ -107,12 +107,13 @@ def perform_experiment(window_size=5):
     model.add(LSTM(input_shape=(window_size, 5),
               hidden_cell_dim=64, return_sequences=False))
     model.add(Dense(size=5, input_size=64, activation="linear"))
+    model.summary()
     predictions = model.run(inputs=train_data_x)
 
     ic(predictions)
     ic(predictions.shape)
 
-    model.save_model(f"model-lstm-window-{window_size}.json")
+    model.save_model(f"model-tes-{window_size}.json")
 
 
 if __name__ == "__main__":

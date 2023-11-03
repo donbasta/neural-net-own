@@ -26,3 +26,10 @@ class Detector(BaseLayer):
 
     def to_object(self):
         return {"type": self.type, "params": {"activation": self.activation}}
+
+    def get_total_params(self):
+        return 0
+
+    def print_info(self):
+        output_shape = "same as input"
+        return f"{self.type}\t{output_shape}\t{0}"

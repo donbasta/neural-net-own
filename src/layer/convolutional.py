@@ -90,6 +90,19 @@ class Convolutional(BaseLayer):
             },
         }
 
+    def get_total_params(self):
+        return self.filter_count * \
+            (self.kernel_shape[0] * self.kernel_shape[1]
+             * self.input_shape[-1])
+
+    def print_info(self):
+        w = 1 + (self.input_shape[1] + 2 * self.padding -
+                 self.kernel_shape[0]) // self.stride
+        h = 1 + (self.input_shape[2] + 2 * self.padding -
+                 self.kernel_shape[1]) // self.stride
+        output_size = (w, h, self.filter_count)
+        return f"{self.type}\t{output_size}\t\t{self.get_total_params()}"
+
 
 def pad_with(vector, pad_width, _, kwargs):
     pad_value = kwargs.get("padder", 10)

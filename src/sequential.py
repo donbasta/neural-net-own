@@ -66,3 +66,14 @@ class Sequential:
             layers_from_file.append(layer_obj)
 
         self.layers = layers_from_file
+
+    def summary(self):
+        total_params = 0
+        print("-------------------------------------")
+        print("Layer\tOutput Shape\tParam Count")
+        for layer in self.layers:
+            print(layer.print_info())
+            total_params += layer.get_total_params()
+
+        print(f"Total Params: {total_params}")
+        print("-------------------------------------")

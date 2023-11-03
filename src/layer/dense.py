@@ -50,3 +50,9 @@ class Dense(BaseLayer):
                 "Wnb": self.weights.tolist()
             },
         }
+
+    def get_total_params(self):
+        return self.weights.shape[0] * self.weights.shape[1]
+
+    def print_info(self):
+        return f"{self.type}\t{self.size}\t\t{self.get_total_params()}"

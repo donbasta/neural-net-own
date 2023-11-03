@@ -23,3 +23,9 @@ class BaseLayer:
 
     def to_object(self):
         pass
+
+    def print_info(self):
+        pass
+
+    def get_total_params(self):
+        pass

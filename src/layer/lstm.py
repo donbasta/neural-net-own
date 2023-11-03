@@ -136,3 +136,14 @@ class LSTM(BaseLayer):
                 },
             },
         }
+
+    def get_total_params(self):
+        return 4 * (self.hidden_cell_dim) * \
+            (self.hidden_cell_dim + self.input_dim + 1)
+
+    def print_info(self):
+        if self.return_sequences:
+            output_shape = (self.timestep, self.hidden_cell_dim)
+        else:
+            output_shape = (self.hidden_cell_dim, 1)
+        return f"{self.type}\t{output_shape}\t\t{self.get_total_params()}"
