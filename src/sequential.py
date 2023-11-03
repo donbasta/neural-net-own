@@ -27,7 +27,8 @@ class Sequential:
             result = i
             for layer in self.layers:
                 result = layer.run(result)
-            print(f"Finished processing data {idx}")
+            if (idx + 1) % 500 == 0:
+                print(f"Finished processing data {idx + 1}")
             final_result.append(result)
 
         return np.array(final_result)

@@ -15,8 +15,8 @@ class LSTM(BaseLayer):
         return_sequences=False
     ):
         self.input_shape = input_shape
-        self.input_dim = input_shape[0]
-        self.timestep = input_shape[1]
+        self.input_dim = input_shape[1]
+        self.timestep = input_shape[0]
         self.hidden_cell_dim = hidden_cell_dim
 
         self.U_forget = np.random.random((self.input_dim, hidden_cell_dim))
